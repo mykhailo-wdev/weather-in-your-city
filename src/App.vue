@@ -9,7 +9,7 @@
 
       <div class="card weather-load" v-if="loading">Loading...</div>
 
-      <div class="card" v-if="error">Error</div>
+      <div class="card" v-if="error">{{ erroMessage}}</div>
 
       <div class="weather-info" v-show="!error && location && temperature !== 0 && description && description">
         <div class="weather-info__text">
@@ -88,7 +88,9 @@ export default {
       description: '',
       loading: false,
       error: false,
-      searchQuery: ''
+      searchQuery: '',
+      erroMessage: 'Doesn\'t correct city or cityname isn\'t in database. Please, try again'
+
     }
   },
 computed: {
@@ -171,7 +173,7 @@ methods: {
         .catch(error => {
           this.loading = false
           this.error = true
-          console.error(error)
+          console.error(error);
         })
     },
     resetSearchQuery() {
