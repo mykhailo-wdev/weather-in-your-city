@@ -4,7 +4,7 @@
 
       <div class="card weather-form">
         <input type="text" class="weather-form__input" v-model="searchQuery" @keyup.enter="weatherSearch" placeholder="Enter city">
-        <button class="weather-form__btn" @click="weatherSearch">Search</button>
+        <button class="weather-form__btn" @click="weatherSearch" :disabled="isDisabled">Search</button>
       </div>
 
       <div class="card weather-load" v-if="loading">Loading...</div>
@@ -80,6 +80,8 @@
 </template>
 
 <script>
+import { watch } from 'vue';
+
 export default {
   data () {
     return {
@@ -89,7 +91,8 @@ export default {
       loading: false,
       error: false,
       searchQuery: '',
-      erroMessage: 'Doesn\'t correct city or cityname isn\'t in database. Please, try again'
+      erroMessage: 'Doesn\'t correct city or cityname isn\'t in database. Please, try again',
+      isDisabled: true
 
     }
   },
@@ -155,12 +158,13 @@ computed: {
 
     return 'weather'
   }
-}
-,
+},
 methods: {
-    weatherSearch() {
+  weatherSearch() {
+    if (this.searchQuery !== '') { 
       this.loading = true
       this.error = false
+      const self = this
       fetch(`http://api.weatherapi.com/v1/current.json?key=c66fe224c6dd40ac96d173530243004&q=${this.searchQuery}`)
         .then(response => response.json())
         .then(data => {
@@ -168,17 +172,33 @@ methods: {
           this.location = data.location.name
           this.temperature = data.current.temp_c
           this.description = data.current.condition.text
-          this.resetSearchQuery();
+          this.resetSearchQuery()
         })
         .catch(error => {
           this.loading = false
-          this.error = true
-          console.error(error);
-        })
-    },
-    resetSearchQuery() {
-      this.searchQuery = ''
+          this.error = true;
+          console.error(error)
+          setTimeout(() => {
+            self.error = false
+          }, 2000);
+        });
+    }
+  },
+  resetSearchQuery() {
+    this.searchQuery = '';
+  }
+},
+
+  
+  watch: {
+  searchQuery(newSearchQuery) {
+    if (newSearchQuery !== '') {
+      this.isDisabled = false;
+    } else {
+      this.isDisabled = true;
     }
   }
+}
+
 }
 </script>
